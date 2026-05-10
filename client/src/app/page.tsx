@@ -1,5 +1,5 @@
-import { NotebookApp } from "@/components/NotebookApp";
+import { WorkspaceShell } from "@/components/workspace/WorkspaceShell";
 
 export default function Home() {
-  return <NotebookApp />;
+  return <WorkspaceShell />;
 }
