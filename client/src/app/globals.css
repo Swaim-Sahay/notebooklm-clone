@@ -1,8 +1,17 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f5f7fb;
+  --background: #f7f8fb;
   --foreground: #0f172a;
+  --muted: #64748b;
+  --panel: #ffffff;
+  --panel-soft: #f1f3f8;
+  --panel-border: #e5e7eb;
+  --accent: #1f4ed8;        /* classic blue */
+  --accent-soft: #e8efff;
+  --accent-2: #0f766e;      /* classic teal */
+  --danger: #b91c1c;
+  --warning: #b45309;
 }
 
 @theme inline {
@@ -12,12 +21,149 @@
   --font-mono: var(--font-geist-mono);
 }
 
+html,
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, sans-serif;
 }
 
 * {
   box-sizing: border-box;
+}
+
+/* ===== Page backdrop (subtle, classic) ============================ */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(50rem 30rem at 0% 0%, rgba(31, 78, 216, 0.05), transparent 60%),
+    radial-gradient(40rem 26rem at 100% 0%, rgba(15, 118, 110, 0.04), transparent 60%),
+    linear-gradient(180deg, #f7f8fb 0%, #f3f5f9 100%);
+}
+
+/* ===== White card surface ========================================== */
+.card {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 20px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.card-soft {
+  background: var(--panel-soft);
+  border: 1px solid var(--panel-border);
+  border-radius: 18px;
+}
+
+/* ===== Subtle accent line for active states ======================== */
+.accent-bar {
+  background: linear-gradient(180deg, var(--accent), var(--accent-2));
+}
+
+/* ===== Skeleton shimmer (light) ==================================== */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.shimmer {
+  background: linear-gradient(90deg, #eef0f4 0%, #f7f8fb 50%, #eef0f4 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s linear infinite;
+}
+
+/* ===== Caret blink for streaming text ============================= */
+@keyframes caret {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+.caret::after {
+  content: "▍";
+  display: inline-block;
+  margin-left: 2px;
+  color: var(--accent);
+  animation: caret 1s steps(1) infinite;
+}
+
+/* ===== Soft pulse for status dots ================================== */
+@keyframes pulse-soft {
+  0%, 100% { opacity: 0.55; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+.pulse-soft { animation: pulse-soft 2.2s ease-in-out infinite; }
+
+/* ===== Scrollbars (light, minimal) ================================= */
+.scroll-soft::-webkit-scrollbar { width: 10px; height: 10px; }
+.scroll-soft::-webkit-scrollbar-thumb {
+  background: #d8dde6;
+  border-radius: 999px;
+  border: 2px solid #f7f8fb;
+}
+.scroll-soft::-webkit-scrollbar-thumb:hover { background: #b9c0cc; }
+.scroll-soft::-webkit-scrollbar-track { background: transparent; }
+
+/* ===== Focus ring (classic blue) =================================== */
+:where(button, a, textarea, input, [tabindex]):focus-visible {
+  outline: 2px solid rgba(31, 78, 216, 0.4);
+  outline-offset: 2px;
+  border-radius: 10px;
+}
+
+/* ===== Tiny utilities ============================================== */
+.hairline { border-color: var(--panel-border); }
+.text-mute { color: var(--muted); }
+.text-accent { color: var(--accent); }
+.bg-accent-soft { background: var(--accent-soft); }
+.border-accent { border-color: var(--accent); }
+
+/* ===== Advanced-RAG badges ======================================== */
+/* Faithfulness pill: shows how grounded the assistant's answer is in the
+   retrieved sources. Three color tiers. */
+.faith-pill {
+  border-radius: 999px;
+  border: 1px solid transparent;
+  padding: 2px 8px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.faith-pill--high {
+  background: rgba(15, 118, 110, 0.08);
+  border-color: rgba(15, 118, 110, 0.25);
+  color: #0f766e;
+}
+.faith-pill--mid {
+  background: rgba(180, 83, 9, 0.08);
+  border-color: rgba(180, 83, 9, 0.25);
+  color: var(--warning);
+}
+.faith-pill--low {
+  background: rgba(185, 28, 28, 0.08);
+  border-color: rgba(185, 28, 28, 0.25);
+  color: var(--danger);
+}
+
+/* Reranker pill: relevance score from the LLM reranker (0–100%). */
+.rerank-pill {
+  border-radius: 6px;
+  border: 1px solid rgba(31, 78, 216, 0.25);
+  background: rgba(31, 78, 216, 0.06);
+  color: var(--accent);
+  padding: 2px 6px;
+  font-size: 10.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Stale tag: applied to both library rows and the top banner. */
+.stale-tag {
+  border-radius: 8px;
+  border-color: rgba(180, 83, 9, 0.25);
+  background: rgba(180, 83, 9, 0.06);
+  color: var(--warning);
 }

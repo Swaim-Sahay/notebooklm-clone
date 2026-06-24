@@ -14,7 +14,7 @@ async function ensureDataDir() {
 }
 
 /**
- * @returns {Promise<Array<{ fileId: string, fileName: string, uploadDate: string, storedPath: string }>>}
+ * @returns {Promise<Array<{ fileId: string, fileName: string, uploadDate: string, storedPath: string, stale?: boolean }>>}
  */
 async function readAll() {
   await ensureDataDir();
@@ -34,7 +34,8 @@ async function writeAll(records) {
 
 async function add(record) {
   const all = await readAll();
-  all.push(record);
+  // New uploads are never stale.
+  all.push({ ...record, stale: false });
   await writeAll(all);
 }
 
@@ -50,10 +51,34 @@ async function getByFileId(fileId) {
   return all.find((r) => r.fileId === fileId) || null;
 }
 
+/**
+ * Update the `stale` flag on a set of records. Used at startup to flag files
+ * that exist on disk but have no corresponding chunks in BM25 (i.e. they were
+ * ingested under the old pipeline and need to be re-uploaded).
+ *
+ * @param {(fileId: string) => boolean} isStaleFn
+ *        Predicate evaluated for each record's fileId. Records where it
+ *        returns true are flagged stale; all others are cleared.
+ */
+async function markStaleBy(isStaleFn) {
+  const all = await readAll();
+  let changed = false;
+  for (const r of all) {
+    const shouldBeStale = Boolean(isStaleFn(r.fileId));
+    if (Boolean(r.stale) !== shouldBeStale) {
+      r.stale = shouldBeStale;
+      changed = true;
+    }
+  }
+  if (changed) await writeAll(all);
+  return all;
+}
+
 module.exports = {
   readAll,
   add,
   removeByFileId,
   getByFileId,
+  markStaleBy,
   DATA_DIR,
 };

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { CloudUpload } from "lucide-react";
+import { CloudUpload, FileText, FileType2 } from "lucide-react";
 
 type Props = {
   onFileSelected: (file: File) => void;
@@ -40,31 +40,46 @@ export function IntakeDropzone({ onFileSelected, uploading, disabled }: Props) {
       }}
       onDragLeave={() => setDragging(false)}
       onDrop={onDrop}
-      className={`relative rounded-3xl border border-dashed px-6 py-8 text-center transition ${
+      className={`relative overflow-hidden rounded-2xl border border-dashed px-5 py-6 text-center transition ${
         dragging
-          ? "border-sky-400 bg-sky-50"
-          : "border-slate-200 bg-slate-50"
-      } ${disabled || uploading ? "opacity-60" : "hover:border-sky-300"}`}
+          ? "border-blue-500 bg-blue-50"
+          : "border-slate-300 bg-slate-50 hover:border-slate-400 hover:bg-slate-100"
+      } ${disabled || uploading ? "opacity-60" : ""}`}
     >
-      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-sm">
-        <CloudUpload className="h-6 w-6 text-sky-500" />
+      <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white shadow-sm">
+        <CloudUpload className="h-5 w-5 text-blue-700" />
       </div>
       <p className="mt-3 text-sm font-semibold text-slate-900">
-        Drop a PDF or TXT file
+        {dragging ? "Release to add" : "Drop a PDF or TXT file"}
       </p>
-      <p className="mt-1 text-xs text-slate-500">
-        We ingest and summarize your source instantly.
+      <p className="mt-1 text-[11.5px] text-slate-500">
+        We ingest and embed it into your library.
       </p>
-      <label className="mt-4 inline-flex cursor-pointer items-center justify-center rounded-2xl bg-slate-900 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white shadow-sm transition hover:bg-slate-800">
-        {uploading ? "Uploading…" : "Browse files"}
-        <input
-          type="file"
-          accept=".pdf,.txt,application/pdf,text/plain"
-          className="hidden"
-          disabled={disabled || uploading}
-          onChange={onChange}
-        />
-      </label>
+
+      <div className="mt-4 flex items-center justify-center gap-2">
+        <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-blue-700 bg-blue-700 px-3.5 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-blue-800">
+          {uploading ? (
+            <>
+              <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+              Uploading…
+            </>
+          ) : (
+            "Browse files"
+          )}
+          <input
+            type="file"
+            accept=".pdf,.txt,application/pdf,text/plain"
+            className="hidden"
+            disabled={disabled || uploading}
+            onChange={onChange}
+          />
+        </label>
+        <div className="hidden items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[10px] font-medium text-slate-500 sm:flex">
+          <FileText className="h-3 w-3" /> PDF
+          <span className="text-slate-300">·</span>
+          <FileType2 className="h-3 w-3" /> TXT
+        </div>
+      </div>
     </div>
   );
 }

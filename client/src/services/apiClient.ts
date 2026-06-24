@@ -1,5 +1,9 @@
 import axios from "axios";
-import type { SourceChunk, UploadedFileMeta } from "@/lib/types";
+import type {
+  Faithfulness,
+  SourceChunk,
+  UploadedFileMeta,
+} from "@/lib/types";
 
 const baseURL =
   typeof window !== "undefined"
@@ -21,11 +25,20 @@ export async function uploadFile(file: File): Promise<UploadedFileMeta> {
   return data;
 }
 
+export type ChatResponse = {
+  answer: string;
+  sources: SourceChunk[];
+  /** The rewritten query used for retrieval. */
+  rewrittenQuery?: string;
+  /** Faithfulness verdict (null when the judge couldn't decide). */
+  faithfulness?: Faithfulness | null;
+};
+
 export async function chatRequest(body: {
   message: string;
   selectedFileIds: string[];
-}): Promise<{ answer: string; sources: SourceChunk[] }> {
-  const { data } = await client.post("/api/chat", body);
+}): Promise<ChatResponse> {
+  const { data } = await client.post<ChatResponse>("/api/chat", body);
   return data;
 }
 

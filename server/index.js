@@ -6,6 +6,8 @@ const fs = require("fs");
 
 const { PORT, assertEnv, FRONTEND_URL } = require("./utils/env");
 const { ensureIndexReady } = require("./services/pineconeService");
+const bm25Service = require("./services/bm25Service");
+const { markStaleBy } = require("./utils/fileMetadataStore");
 const { handleUpload, UPLOAD_ROOT } = require("./controllers/uploadController");
 const { handleChat } = require("./controllers/chatController");
 const { listFiles, deleteFile } = require("./controllers/filesController");
@@ -74,7 +76,21 @@ app.use((err, _req, res, _next) => {
 
 async function start() {
   assertEnv();
+  // Order matters: ensure the Pinecone index is in v2 form (which may delete
+  // and recreate it), THEN load the on-disk BM25 index. If the Pinecone index
+  // was recreated, BM25 will be out of sync with it and we mark all known
+  // files as stale so the UI tells the user to re-upload.
   await ensureIndexReady();
+  await bm25Service.loadFromDisk();
+  const indexed = new Set(bm25Service.listIndexedFileIds());
+  const updated = await markStaleBy((fileId) => !indexed.has(fileId));
+  const staleCount = updated.filter((r) => r.stale).length;
+  if (staleCount > 0) {
+    console.warn(
+      `[startup] ${staleCount} file(s) are out of date with the current index. ` +
+        `Re-upload them from the Library to restore retrieval.`
+    );
+  }
   app.listen(PORT, () => {
     console.log(`API listening on ${FRONTEND_URL.replace(/\/$/, "")}:${PORT}`);
   });

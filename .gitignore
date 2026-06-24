@@ -29,6 +29,7 @@
 /server/uploads/*
 !/server/uploads/.gitkeep
 /server/data/files.json
+/server/data/bm25-index.json
 
 # debug
 npm-debug.log*
@@ -38,6 +39,9 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env
+.env.local
+/client/.env.local
+/client/.env*.local
 
 # vercel
 .vercel

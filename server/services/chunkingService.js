@@ -1,21 +1,16 @@
-const { RecursiveCharacterTextSplitter } = require("@langchain/textsplitters");
-
-const splitter = new RecursiveCharacterTextSplitter({
-  chunkSize: 500,
-  chunkOverlap: 100,
-});
+const { chunkTextSemantic } = require("./semanticChunkingService");
 
 /**
  * @param {string} text
  * @returns {Promise<string[]>}
+ *
+ * Backwards-compatible shim. The original `chunkText` used a 500/100 recursive
+ * split; we now delegate to the semantic chunker, which keeps length in check
+ * via the same RecursiveCharacterTextSplitter at 800/150 but adds semantic
+ * boundary detection on top.
  */
 async function chunkText(text) {
-  const trimmed = (text || "").trim();
-  if (!trimmed) return [];
-  const chunks = await splitter.splitText(trimmed);
-  return chunks.map((c) => c.trim()).filter(Boolean);
+  return chunkTextSemantic(text);
 }
 
-module.exports = {
-  chunkText,
-};
+module.exports = { chunkText };
